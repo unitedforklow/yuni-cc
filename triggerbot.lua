@@ -3,13 +3,31 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
-local Mouse = LocalPlayer:GetMouse()
 
-shared.YuniSettings.TriggerBot = {
+repeat task.wait() until shared.YuniSettings and shared.YuniSettings.Loaded
+
+shared.YuniSettings.TriggerBot = shared.YuniSettings.TriggerBot or {
     Enabled = false,
     IgnoreTeammates = true,
     Delay = 0,
 }
+
+local function findGui()
+    local paths = {
+        gethui and gethui(),
+        game:GetService("CoreGui"),
+        LocalPlayer:FindFirstChildOfClass("PlayerGui")
+    }
+    for _, path in ipairs(paths) do
+        if path then
+            local gui = path:FindFirstChild("YuniCC_Gui")
+            if gui then
+                return gui
+            end
+        end
+    end
+    return nil
+end
 
 local function click()
     if mouse1press and mouse1release then
@@ -28,6 +46,7 @@ end
 local function checkTarget()
     local settings = shared.YuniSettings.TriggerBot
     local mouseLocation = UserInputService:GetMouseLocation()
+    
     local mouseRay = Camera:ViewportPointToRay(mouseLocation.X, mouseLocation.Y)
     
     local raycastParams = RaycastParams.new()
@@ -36,14 +55,17 @@ local function checkTarget()
     raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, Camera}
     
     local result = workspace:Raycast(mouseRay.Origin, mouseRay.Direction * 1000, raycastParams)
+    
     if result and result.Instance then
         local hitPart = result.Instance
         local character = hitPart:FindFirstAncestorOfClass("Model")
         local targetPlayer = character and Players:GetPlayerFromCharacter(character)
+        
         if targetPlayer and targetPlayer ~= LocalPlayer then
             if settings.IgnoreTeammates and targetPlayer.Team == LocalPlayer.Team then
                 return false
             end
+            
             local humanoid = character:FindFirstChildOfClass("Humanoid")
             if humanoid and humanoid.Health > 0 then
                 return true
@@ -70,9 +92,11 @@ TriggerConn = RunService.PostSimulation:Connect(function()
                 if settings.Delay > 0 then
                     task.wait(settings.Delay / 1000)
                 end
+                
                 if checkTarget() then
                     click()
                 end
+                
                 task.wait(0.12)
                 isShooting = false
             end)
@@ -81,11 +105,14 @@ TriggerConn = RunService.PostSimulation:Connect(function()
 end)
 
 task.spawn(function()
-    local TargetParent = gethui and gethui() or game:GetService("CoreGui")
-    local ScreenGui = TargetParent:WaitForChild("YuniCC_Gui", 12)
-    local MainFrame = ScreenGui and ScreenGui:FindFirstChild("MainFrame")
-    local TabsFrame = MainFrame and MainFrame:FindFirstChild("TabsFrame")
-    local ContentFrame = MainFrame and MainFrame:FindFirstChild("ContentFrame")
+    local ScreenGui = findGui()
+    if not ScreenGui then
+        warn("[yuni.cc TriggerBot] UI не найден в доступных путях.")
+        return
+    end
+
+    local TabsFrame = ScreenGui:FindFirstChild("TabsFrame", true)
+    local ContentFrame = ScreenGui:FindFirstChild("ContentFrame", true)
 
     if TabsFrame and ContentFrame then
         if TabsFrame:FindFirstChild("TriggerBotTab") then TabsFrame.TriggerBotTab:Destroy() end
@@ -124,8 +151,8 @@ task.spawn(function()
                     page.Visible = false
                 end
             end
-
             TriggerBotPage.Visible = true
+
             for _, btn in ipairs(TabsFrame:GetChildren()) do
                 if btn:IsA("TextButton") then
                     btn.TextColor3 = Color3.fromRGB(180, 180, 180)
@@ -185,7 +212,7 @@ task.spawn(function()
                 Indicator.Visible = configTable[configKey]
             end)
         end
-      
+
         local function AddSlider(text, min, max, default, configTable, configKey)
             local Container = Instance.new("Frame")
             Container.Size = UDim2.new(1, -10, 0, 45)
@@ -257,10 +284,12 @@ task.spawn(function()
                 end
             end)
         end
-      
+
         AddToggle("Enable TriggerBot", shared.YuniSettings.TriggerBot, "Enabled")
         AddToggle("Ignore Teammates", shared.YuniSettings.TriggerBot, "IgnoreTeammates")
         AddSlider("Reaction Delay (ms)", 0, 500, shared.YuniSettings.TriggerBot.Delay, shared.YuniSettings.TriggerBot, "Delay")
+    else
+        warn("[yuni.cc TriggerBot] Failed to find tab or page containers.")
     end
 end)
 
