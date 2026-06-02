@@ -31,6 +31,10 @@ shared.YuniSettings = {
         AntiAFK = true,
         InfJump = false,
         FPSCap = 144,
+
+        FakeLagEnabled = false,
+        FakeLagLimit = 15,
+        FakeLagKey = Enum.KeyCode.F,
     }
 }
 
@@ -103,7 +107,7 @@ BadgeCorner.Parent = Badge
 local BadgeText = Instance.new("TextLabel")
 BadgeText.Size = UDim2.new(1, 0, 1, 0)
 BadgeText.BackgroundTransparency = 1
-BadgeText.Text = "v1.0.0"
+BadgeText.Text = "v1.0.1"
 BadgeText.Font = Enum.Font.GothamBold
 BadgeText.TextSize = 11
 BadgeText.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -738,6 +742,10 @@ CreateToggle(MiscPage, "Anti-AFK Bypass", "Anti-idle 20 minutes kick preventer",
 CreateToggle(MiscPage, "Infinite Jump", "Allows multi-jumping inside mid-air", shared.YuniSettings.Misc, "InfJump")
 CreateSlider(MiscPage, "FPS Limit", "Unlock and restrict framerate cap", 30, 360, shared.YuniSettings.Misc.FPSCap, shared.YuniSettings.Misc, "FPSCap")
 
+CreateToggle(MiscPage, "Fake Lag", "Desyncs physics replication to bypass ragdolls or disrupt targeting", shared.YuniSettings.Misc, "FakeLagEnabled")
+CreateSlider(MiscPage, "Fake Lag Limit", "Replication freeze length (ticks)", 1, 30, shared.YuniSettings.Misc.FakeLagLimit, shared.YuniSettings.Misc, "FakeLagLimit")
+CreateKeybind(MiscPage, "Fake Lag Keybind", "Toggle Fake Lag instantly", shared.YuniSettings.Misc, "FakeLagKey")
+
 CreateButtonCard(ConfigsPage, "Save Settings", "Write configs to workspace folder", "Save", function()
     print("Configs successfully saved!")
 end)
@@ -819,6 +827,10 @@ end)
 
 task.spawn(function()
     SafeLoad("TriggerBot Module", BaseGitHubUrl .. "triggerbot.lua")
+end)
+
+task.spawn(function()
+    SafeLoad("Fake Lag Module", BaseGitHubUrl .. "fakelag.lua")
 end)
 
 shared.YuniSettings.Loaded = true
