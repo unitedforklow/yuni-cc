@@ -744,7 +744,7 @@ CreateSlider(MiscPage, "FPS Limit", "Unlock and restrict framerate cap", 30, 360
 
 CreateToggle(MiscPage, "Fake Lag", "Desyncs physics replication to bypass ragdolls or disrupt targeting", shared.YuniSettings.Misc, "FakeLagEnabled")
 CreateSlider(MiscPage, "Fake Lag Limit", "Replication freeze length (ticks)", 1, 30, shared.YuniSettings.Misc.FakeLagLimit, shared.YuniSettings.Misc, "FakeLagLimit")
-CreateKeybind(MiscPage, "Fake Lag Keybind", "Toggle Fake Lag instantly", shared.YuniSettings.Misc, "FakeLagKey")
+CreateKeybind(MiscPage, "Fake Lag Keybind", "Toggle Fake Lag instantly", shared.YuniSettings.Misc.FakeLagKey, shared.YuniSettings.Misc, "FakeLagKey")
 
 CreateButtonCard(ConfigsPage, "Save Settings", "Write configs to workspace folder", "Save", function()
     print("Configs successfully saved!")
