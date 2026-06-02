@@ -77,6 +77,7 @@ TitleShadow.ZIndex = Title.ZIndex - 1
 TitleShadow.Parent = Header
 
 local TabsFrame = Instance.new("Frame")
+TabsFrame.Name = "TabsFrame"
 TabsFrame.Position = UDim2.new(0, 0, 0, 40)
 TabsFrame.Size = UDim2.new(0, 130, 1, -40)
 TabsFrame.BackgroundTransparency = 1
@@ -88,6 +89,7 @@ TabsLayout.Padding = UDim.new(0, 5)
 TabsLayout.Parent = TabsFrame
 
 local ContentFrame = Instance.new("Frame")
+ContentFrame.Name = "ContentFrame"
 ContentFrame.Position = UDim2.new(0, 140, 0, 50)
 ContentFrame.Size = UDim2.new(1, -150, 1, -60)
 ContentFrame.BackgroundTransparency = 1
