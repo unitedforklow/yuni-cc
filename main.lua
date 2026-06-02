@@ -593,12 +593,21 @@ local function CreateKeybind(parent, text, desc, default, configTable, configKey
     Description.TextXAlignment = Enum.TextXAlignment.Left
     Description.Parent = Card
 
+    local buttonText = "None"
+    if default then
+        if typeof(default) == "EnumItem" then
+            buttonText = default.Name
+        elseif typeof(default) == "string" then
+            buttonText = default
+        end
+    end
+
     local Button = Instance.new("TextButton")
     Button.Size = UDim2.new(0, 90, 0, 24)
     Button.Position = UDim2.new(1, -105, 0.5, -12)
     Button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     Button.BorderSizePixel = 0
-    Button.Text = default.Name
+    Button.Text = buttonText
     Button.Font = Enum.Font.GothamMedium
     Button.TextColor3 = Color3.fromRGB(54, 100, 244)
     Button.TextSize = 12
