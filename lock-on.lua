@@ -366,4 +366,4 @@ task.spawn(function()
     end
 end)
 
-print("[yuni.cc] Модуль Lock-on успешно обновлен.")
+print("[yuni.cc] Module Lock-on is loaded.")
