@@ -32,6 +32,10 @@ local RunService = game:GetService("RunService")
 
 local TargetParent = gethui and gethui() or game:GetService("CoreGui")
 
+if TargetParent:FindFirstChild("YuniCC_Gui") then
+    TargetParent.YuniCC_Gui:Destroy()
+end
+
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "YuniCC_Gui"
 ScreenGui.ResetOnSpawn = false
@@ -464,5 +468,7 @@ task.spawn(function()
     SafeLoad("TriggerBot Module", BaseGitHubUrl .. "triggerbot.lua")
     print("TriggerBot Module loaded in main.lua.")
 end)
+
+shared.YuniSettings.Loaded = true
 
 print("[yuni.cc] Main interface is loaded!")
