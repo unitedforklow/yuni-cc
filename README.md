@@ -15,7 +15,7 @@
 To use this, copy&paste this code into your executor:
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/unitedforklow/sgjujsusujgusgsujg/main/main.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/unitedforklow/yuni-cc/main/main.lua"))()
 ```
 
 *Show/hide menu:* **`Insert`**
