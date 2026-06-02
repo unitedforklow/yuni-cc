@@ -445,18 +445,22 @@ end
 
 task.spawn(function()
     SafeLoad("Visuals Module", BaseGitHubUrl .. "visuals.lua")
+    print("Visuals Module loaded in main.lua.")
 end)
 
 task.spawn(function()
     SafeLoad("Lock-on Module", BaseGitHubUrl .. "lock-on.lua")
+    print("Lock-on Module loaded in main.lua.")
 end)
 
 task.spawn(function()
     SafeLoad("Misc Module", BaseGitHubUrl .. "misc.lua")
+    print("Misc Module loaded in main.lua.")
 end)
 
 task.spawn(function()
     SafeLoad("TriggerBot Module", BaseGitHubUrl .. "triggerbot.lua")
+    print("TriggerBot Module loaded in main.lua.")
 end)
 
 print("[yuni.cc] Main interface is loaded!")
