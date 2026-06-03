@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local GuiService = game:GetService("GuiService") -- Добавлено для учета GUI Inset
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
@@ -156,25 +157,43 @@ local function aimAt(target)
     elseif settings.Type == "Mouse" then
         local screenPos, onScreen = Camera:WorldToViewportPoint(targetPos)
         if onScreen then
-            local isMouseLocked = UserInputService.MouseBehavior == Enum.MouseBehavior.LockCenter
-            local originPos = isMouseLocked and Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2) or UserInputService:GetMouseLocation()
+            -- 1. Определяем, скрыт/заблокирован ли курсор в центре (1-е лицо, Shift-Lock, зажатая ПКМ)
+            local isMouseLocked = UserInputService.MouseBehavior == Enum.MouseBehavior.LockCenter 
+                               or UserInputService.MouseBehavior == Enum.MouseBehavior.LockCurrentPosition
+                               or not UserInputService.CursorIconEnabled
+
+            local originPos
+            if isMouseLocked then
+                -- Если мышь заблокирована игрой, за центр отсчета всегда берем середину вьюпорта
+                originPos = Camera.ViewportSize / 2
+            else
+                -- Если мышь свободна, вычитаем смещение GuiInset, чтобы сопоставить координаты
+                local guiInset = GuiService:GetGuiInset()
+                originPos = UserInputService:GetMouseLocation() - guiInset
+            end
             
+            -- 2. Вычисляем точную разницу в пикселях
             local diffX = (screenPos.X - originPos.X)
             local diffY = (screenPos.Y - originPos.Y)
             
-            local stepX = diffX / math.max(settings.Smoothness, 1)
-            local stepY = diffY / math.max(settings.Smoothness, 1)
+            -- 3. Делим на плавность (чем выше Smoothness, тем медленнее доводка)
+            local smooth = math.max(settings.Smoothness, 1)
+            local stepX = diffX / smooth
+            local stepY = diffY / smooth
 
-            local maxMove = 25
+            -- 4. Ограничиваем максимальный шаг за один кадр.
+            -- Это защищает прицел от «взлета» или резкого разворота при высокой сенсе мыши.
+            local maxMove = 35
             stepX = math.clamp(stepX, -maxMove, maxMove)
             stepY = math.clamp(stepY, -maxMove, maxMove)
 
             if mousemoverel then
                 mousemoverel(stepX, stepY)
             else
+                -- Мягкий фоллбек на CFrame-наводку, если эксплоит не поддерживает mousemoverel
                 local currentCF = Camera.CFrame
                 local targetCF = CFrame.new(Camera.CFrame.Position, targetPos)
-                local smoothAmount = math.clamp(1 / settings.Smoothness, 0.01, 1)
+                local smoothAmount = math.clamp(1 / smooth, 0.01, 1)
                 Camera.CFrame = currentCF:Lerp(targetCF, smoothAmount)
             end
         end
@@ -366,4 +385,4 @@ task.spawn(function()
     end
 end)
 
-print("[yuni.cc] Module Lock-on is loaded.")
+print("[yuni.cc] Module Lock-on is loaded with Mouse fixes.")
