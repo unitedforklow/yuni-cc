@@ -7,10 +7,12 @@ local Camera = workspace.CurrentCamera
 
 local mousemoverel = mousemoverel or (Input and Input.MouseMove) or (syn and syn.mousemoverel)
 
+assert(hookmetamethod, "[yuni.cc] Executor does not support hookmetamethod!")
+assert(checkcaller, "[yuni.cc] Executor does not support checkcaller!")
+
 if shared.YuniSettings and shared.YuniSettings.LockOn then
     shared.YuniSettings.LockOn.Sticky = shared.YuniSettings.LockOn.Sticky or false
     shared.YuniSettings.LockOn.WallCheck = shared.YuniSettings.LockOn.WallCheck or false
-    shared.YuniSettings.LockOn.WallHack = shared.YuniSettings.LockOn.WallHack or false
 end
 
 local FovCircle = Drawing.new("Circle")
@@ -23,8 +25,6 @@ FovCircle.Visible = false
 
 local lockOnActive = false
 local currentTarget = nil
-local isLmbPressed = false
-local modifiedParts = {}
 
 local function checkWall(targetPosition, targetCharacter)
     local localCharacter = LocalPlayer.Character
@@ -148,13 +148,7 @@ local function aimAt(target)
         targetPos = targetPos + (velocity * (settings.Prediction / 100))
     end
 
-    if settings.Type == "Camera" then
-        local currentCF = Camera.CFrame
-        local targetCF = CFrame.new(Camera.CFrame.Position, targetPos)
-        local smoothAmount = math.clamp(1 / settings.Smoothness, 0.01, 1)
-        Camera.CFrame = currentCF:Lerp(targetCF, smoothAmount)
-        
-    elseif settings.Type == "Mouse" then
+    if settings.Type == "Mouse" then
         local screenPos, onScreen = Camera:WorldToViewportPoint(targetPos)
         if onScreen then
             local isMouseLocked = UserInputService.MouseBehavior == Enum.MouseBehavior.LockCenter 
@@ -182,24 +176,56 @@ local function aimAt(target)
 
             if mousemoverel then
                 mousemoverel(stepX, stepY)
-            else
-                local currentCF = Camera.CFrame
-                local targetCF = CFrame.new(Camera.CFrame.Position, targetPos)
-                local smoothAmount = math.clamp(1 / smooth, 0.01, 1)
-                Camera.CFrame = currentCF:Lerp(targetCF, smoothAmount)
             end
         end
     end
 end
 
-local function restoreWalls()
-    for part, originalParent in pairs(modifiedParts) do
-        if part then
-            part.Parent = originalParent
+local lastTime = os.clock()
+local function getSmoothLookCFrame(originalCFrame, targetPosition, smoothness)
+    local origin = originalCFrame.Position
+    local targetCFrame = CFrame.new(origin, targetPosition)
+    
+    local currentTime = os.clock()
+    local dt = currentTime - lastTime
+    lastTime = currentTime
+    
+    dt = math.clamp(dt, 0.001, 0.1)
+    
+    local lerpFactor = math.clamp((1 / smoothness) * (dt * 60), 0.01, 1)
+    return originalCFrame:Lerp(targetCFrame, lerpFactor)
+end
+
+local HookNewIndex
+HookNewIndex = hookmetamethod(game, "__newindex", newcclosure(function(self, property, value)
+    -- Если чит выгружается, мгновенно пропускаем хук
+    if not shared.YuniSettings or not shared.YuniSettings.Active then
+        return HookNewIndex(self, property, value)
+    end
+
+    if self == Camera and property == "CFrame" and not checkcaller() then
+        local settings = shared.YuniSettings.LockOn
+        if settings and settings.Enabled and lockOnActive and settings.Type == "Camera" then
+            local target = getClosestPlayer()
+            local character = target and target.Character
+            local aimPart = character and (character:FindFirstChild("Head") or character:FindFirstChild("HumanoidRootPart"))
+            
+            if aimPart then
+                local targetPos = aimPart.Position
+                
+                local velocity = aimPart.AssemblyLinearVelocity or aimPart.Velocity
+                if velocity and settings.Prediction > 0 then
+                    targetPos = targetPos + (velocity * (settings.Prediction / 100))
+                end
+                
+                local smoothVal = math.max(settings.Smoothness, 1)
+                value = getSmoothLookCFrame(value, targetPos, smoothVal)
+            end
         end
     end
-    table.clear(modifiedParts)
-end
+
+    return HookNewIndex(self, property, value)
+end))
 
 local InputBeganConn
 InputBeganConn = UserInputService.InputBegan:Connect(function(input, processed)
@@ -214,10 +240,6 @@ InputBeganConn = UserInputService.InputBegan:Connect(function(input, processed)
             lockOnActive = true
         end
     end
-
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        isLmbPressed = true
-    end
 end)
 
 local InputEndedConn
@@ -231,18 +253,12 @@ InputEndedConn = UserInputService.InputEnded:Connect(function(input, processed)
             currentTarget = nil
         end
     end
-
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        isLmbPressed = false
-        restoreWalls()
-    end
 end)
 
 local PreRenderConn
 PreRenderConn = RunService.PreRender:Connect(function()
     if not shared.YuniSettings or not shared.YuniSettings.Active then
         FovCircle:Destroy()
-        restoreWalls()
         InputBeganConn:Disconnect()
         InputEndedConn:Disconnect()
         PreRenderConn:Disconnect()
@@ -250,58 +266,6 @@ PreRenderConn = RunService.PreRender:Connect(function()
     end
 
     local settings = shared.YuniSettings.LockOn
-
-    if settings.WallHack and isLmbPressed then
-        local localCharacter = LocalPlayer.Character
-        if localCharacter then
-            local origin = Camera.CFrame.Position
-            local direction = nil
-            
-            if lockOnActive and currentTarget and currentTarget.Character then
-                local targetHrp = currentTarget.Character:FindFirstChild("HumanoidRootPart")
-                if targetHrp then
-                    direction = (targetHrp.Position - origin)
-                end
-            end
-
-            if not direction then
-                local mouseLocation = UserInputService:GetMouseLocation()
-                local mouseRay = Camera:ViewportPointToRay(mouseLocation.X, mouseLocation.Y)
-                direction = mouseRay.Direction * 1000
-            end
-            
-            local raycastParams = RaycastParams.new()
-            raycastParams.FilterType = Enum.RaycastFilterType.Exclude
-
-            local filter = {localCharacter, Camera}
-            for _, p in ipairs(Players:GetPlayers()) do
-                if p.Character then
-                    table.insert(filter, p.Character)
-                end
-            end
-
-            for i = 1, 6 do
-                raycastParams.FilterDescendantsInstances = filter
-                local result = workspace:Raycast(origin, direction, raycastParams)
-                
-                if result and result.Instance then
-                    local hitPart = result.Instance
-                    
-                    local isFloor = hitPart.Name:lower():find("floor") or hitPart.Name:lower():find("baseplate") or hitPart.Name:lower():find("ground") or hitPart:IsA("Terrain")
-                    
-                    if hitPart:IsA("BasePart") and not isFloor then
-                        if not modifiedParts[hitPart] then
-                            modifiedParts[hitPart] = hitPart.Parent
-                            hitPart.Parent = nil
-                        end
-                    end
-                    table.insert(filter, hitPart)
-                else
-                    break
-                end
-            end
-        end
-    end
 
     if settings.Enabled and settings.FOV then
         local mouseLocation = UserInputService:GetMouseLocation()
@@ -312,7 +276,7 @@ PreRenderConn = RunService.PreRender:Connect(function()
         FovCircle.Visible = false
     end
 
-    if settings.Enabled and lockOnActive then
+    if settings.Enabled and lockOnActive and settings.Type == "Mouse" then
         local target = getClosestPlayer()
         if target then
             aimAt(target)
@@ -373,8 +337,7 @@ task.spawn(function()
 
         AddToggle("Sticky Aim", shared.YuniSettings.LockOn, "Sticky", "StickyFrame")
         AddToggle("Wall Check", shared.YuniSettings.LockOn, "WallCheck", "WallCheckFrame")
-        AddToggle("Wall Hack (Delete Walls on LMB)", shared.YuniSettings.LockOn, "WallHack", "WallHackFrame")
     end
 end)
 
-print("[yuni.cc] Module Lock-on is loaded with Mouse fixes.")
+print("[yuni.cc] Module Lock-on is loaded.")
