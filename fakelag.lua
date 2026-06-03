@@ -114,4 +114,4 @@ connections.Heartbeat = RunService.Heartbeat:Connect(function()
     end
 end)
 
-print("[yuni.cc] Backend FakeLag module successfully loaded with Error Handling.")
+print("[yuni.cc] Module FakeLag is loaded.")
