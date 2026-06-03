@@ -773,16 +773,6 @@ LockHeader.TextSize = 11
 LockHeader.TextXAlignment = Enum.TextXAlignment.Left
 LockHeader.Parent = LegitPage
 
-local SilentHeader = Instance.new("TextLabel")
-SilentHeader.Size = UDim2.new(1, 0, 0, 25)
-SilentHeader.BackgroundTransparency = 1
-SilentHeader.Text = "  SILENT AIMBOT"
-SilentHeader.Font = Enum.Font.GothamBold
-SilentHeader.TextColor3 = Color3.fromRGB(54, 100, 244)
-SilentHeader.TextSize = 11
-SilentHeader.TextXAlignment = Enum.TextXAlignment.Left
-SilentHeader.Parent = LegitPage
-
 CreateToggle(LegitPage, "Enable Lock-on", "Smooth aim assist towards target head", shared.YuniSettings.LockOn, "Enabled")
 CreateKeybind(LegitPage, "Lock-on Keybind", "Key to lock onto targets", shared.YuniSettings.LockOn.Key, shared.YuniSettings.LockOn, "Key")
 CreateDropdown(LegitPage, "Lock-on Mode", "Aim assist toggle behavior", {"Hold", "Toggle"}, shared.YuniSettings.LockOn.Mode, shared.YuniSettings.LockOn, "Mode")
@@ -795,6 +785,16 @@ CreateSlider(LegitPage, "FOV Size", "Define maximum radius to allow capture", 30
 CreateToggle(LegitPage, "Sticky Aim", "Lock onto first target and hold focus", shared.YuniSettings.LockOn, "Sticky")
 CreateToggle(LegitPage, "Wall Check", "Prevent aiming at targets behind opaque objects", shared.YuniSettings.LockOn, "WallCheck")
 CreateToggle(LegitPage, "Wall Hack (No-Collide)", "Physically bypass obstructing walls on fire", shared.YuniSettings.LockOn, "WallHack")
+
+local SilentHeader = Instance.new("TextLabel")
+SilentHeader.Size = UDim2.new(1, 0, 0, 25)
+SilentHeader.BackgroundTransparency = 1
+SilentHeader.Text = "  SILENT AIMBOT"
+SilentHeader.Font = Enum.Font.GothamBold
+SilentHeader.TextColor3 = Color3.fromRGB(54, 100, 244)
+SilentHeader.TextSize = 11
+SilentHeader.TextXAlignment = Enum.TextXAlignment.Left
+SilentHeader.Parent = LegitPage
 
 CreateToggle(LegitPage, "Enable Silent Aim", "Redirects hits to targets without snapping camera", shared.YuniSettings.Silent, "Enabled")
 CreateToggle(LegitPage, "Always On", "Does not require keybind to be held", shared.YuniSettings.Silent, "AlwaysOn")
