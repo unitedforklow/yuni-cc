@@ -2,7 +2,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
-local timeout = 15 -- секунд
+local timeout = 15 -- seconds
 local elapsed = 0
 while not (shared.YuniSettings and shared.YuniSettings.Loaded) do
     task.wait(0.5)
