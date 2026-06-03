@@ -755,7 +755,7 @@ CreateToggle(VisualsPage, "Tracers", "Draw paths from bottom center to targets",
 local LockHeader = Instance.new("TextLabel")
 LockHeader.Size = UDim2.new(1, 0, 0, 25)
 LockHeader.BackgroundTransparency = 1
-LockHeader.Text = "  AIM ASSIST (LOCK-ON)"
+LockHeader.Text = "  AIM BOT (LOCK-ON)"
 LockHeader.Font = Enum.Font.GothamBold
 LockHeader.TextColor3 = Color3.fromRGB(54, 100, 244)
 LockHeader.TextSize = 11
@@ -773,7 +773,6 @@ CreateToggle(LegitPage, "Show FOV Circle", "Draw dynamic limit capture radius", 
 CreateSlider(LegitPage, "FOV Size", "Define maximum radius to allow capture", 30, 500, shared.YuniSettings.LockOn.FOVSize, shared.YuniSettings.LockOn, "FOVSize")
 CreateToggle(LegitPage, "Sticky Aim", "Lock onto first target and hold focus", shared.YuniSettings.LockOn, "Sticky")
 CreateToggle(LegitPage, "Wall Check", "Prevent aiming at targets behind opaque objects", shared.YuniSettings.LockOn, "WallCheck")
-CreateToggle(LegitPage, "Wall Hack (No-Collide)", "Physically bypass obstructing walls on fire", shared.YuniSettings.LockOn, "WallHack")
 
 local TrigHeader = Instance.new("TextLabel")
 TrigHeader.Size = UDim2.new(1, 0, 0, 25)
