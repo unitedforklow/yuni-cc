@@ -38,6 +38,43 @@ shared.YuniSettings = {
     }
 }
 
+-- CONFIGS LOADOUT
+
+pcall(function()
+    if isfile and isfile("yuni_config.json") and readfile then
+        local HttpService = game:GetService("HttpService")
+        local rawJson = readfile("yuni_config.json")
+        local data = HttpService:JSONDecode(rawJson)
+        
+        local function restoreAndMerge(target, source)
+            for k, v in pairs(source) do
+                if type(v) == "table" and type(target[k]) == "table" then
+                    if v.__enum and v.value then
+                        pcall(function()
+                            local enumType = v.__enum:gsub("Enum.", "")
+                            target[k] = Enum[enumType][v.value]
+                        end)
+                    else
+                        restoreAndMerge(target[k], v)
+                    end
+                else
+                    if type(v) == "table" and v.__enum and v.value then
+                        pcall(function()
+                            local enumType = v.__enum:gsub("Enum.", "")
+                            target[k] = Enum[enumType][v.value]
+                        end)
+                    else
+                        target[k] = v
+                    end
+                end
+            end
+        end
+        
+        restoreAndMerge(shared.YuniSettings, data)
+        print("[yuni.cc] Autoload: Config successfully applied on startup!")
+    end
+end)
+
 local BaseGitHubUrl = "https://raw.githubusercontent.com/unitedforklow/yuni-cc/main/"
 
 local UserInputService = game:GetService("UserInputService")
