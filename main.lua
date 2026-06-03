@@ -793,11 +793,21 @@ CreateSlider(MiscPage, "Fake Lag Limit", "Replication freeze length (ticks)", 1,
 CreateKeybind(MiscPage, "Fake Lag Keybind", "Toggle Fake Lag instantly", shared.YuniSettings.Misc.FakeLagKey, shared.YuniSettings.Misc, "FakeLagKey")
 
 CreateButtonCard(ConfigsPage, "Save Settings", "Write configs to workspace folder", "Save", function()
-    print("Configs successfully saved!")
+    if shared.YuniActions and shared.YuniActions.SaveConfig then
+        shared.YuniActions.SaveConfig()
+    else
+        warn("[yuni.cc] Save action is not registered yet.")
+    end
 end)
 
 CreateButtonCard(ConfigsPage, "Load Settings", "Read configs from workspace folder", "Load", function()
-    print("Configs successfully loaded!")
+    if shared.YuniActions and shared.YuniActions.LoadConfig then
+        shared.YuniActions.LoadConfig()
+        -- Так как UI уже построен, изменения применятся в бэкенде мгновенно.
+        -- Для визуального обновления интерфейса рекомендуется перезапустить чит.
+    else
+        warn("[yuni.cc] Load action is not registered yet.")
+    end
 end)
 
 CreateButtonCard(SettingsPage, "Unload GUI", "Destroy screen gui and terminate loops", "Unload", function()
@@ -877,6 +887,10 @@ end)
 
 task.spawn(function()
     SafeLoad("Fake Lag Module", BaseGitHubUrl .. "fakelag.lua")
+end)
+
+task.spawn(function()
+    SafeLoad("Configs Module", BaseGitHubUrl .. "configs.lua")
 end)
 
 shared.YuniSettings.Loaded = true
