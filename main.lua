@@ -22,6 +22,17 @@ shared.YuniSettings = {
         WallCheck = false,
         WallHack = false,
     },
+    Silent = {
+        Enabled = false,
+        AlwaysOn = false,
+        Key = Enum.KeyCode.V,
+        FOVSize = 100,
+        ShowFOV = false,
+        ShowVisualizer = false,
+        Prediction = false,
+        PredictionAmount = 1.5,
+        TargetBone = "Head",
+    },
     TriggerBot = {
         Enabled = false,
         IgnoreTeammates = true,
@@ -762,6 +773,16 @@ LockHeader.TextSize = 11
 LockHeader.TextXAlignment = Enum.TextXAlignment.Left
 LockHeader.Parent = LegitPage
 
+local SilentHeader = Instance.new("TextLabel")
+SilentHeader.Size = UDim2.new(1, 0, 0, 25)
+SilentHeader.BackgroundTransparency = 1
+SilentHeader.Text = "  SILENT AIMBOT"
+SilentHeader.Font = Enum.Font.GothamBold
+SilentHeader.TextColor3 = Color3.fromRGB(54, 100, 244)
+SilentHeader.TextSize = 11
+SilentHeader.TextXAlignment = Enum.TextXAlignment.Left
+SilentHeader.Parent = LegitPage
+
 CreateToggle(LegitPage, "Enable Lock-on", "Smooth aim assist towards target head", shared.YuniSettings.LockOn, "Enabled")
 CreateKeybind(LegitPage, "Lock-on Keybind", "Key to lock onto targets", shared.YuniSettings.LockOn.Key, shared.YuniSettings.LockOn, "Key")
 CreateDropdown(LegitPage, "Lock-on Mode", "Aim assist toggle behavior", {"Hold", "Toggle"}, shared.YuniSettings.LockOn.Mode, shared.YuniSettings.LockOn, "Mode")
@@ -774,6 +795,16 @@ CreateSlider(LegitPage, "FOV Size", "Define maximum radius to allow capture", 30
 CreateToggle(LegitPage, "Sticky Aim", "Lock onto first target and hold focus", shared.YuniSettings.LockOn, "Sticky")
 CreateToggle(LegitPage, "Wall Check", "Prevent aiming at targets behind opaque objects", shared.YuniSettings.LockOn, "WallCheck")
 CreateToggle(LegitPage, "Wall Hack (No-Collide)", "Physically bypass obstructing walls on fire", shared.YuniSettings.LockOn, "WallHack")
+
+CreateToggle(LegitPage, "Enable Silent Aim", "Redirects hits to targets without snapping camera", shared.YuniSettings.Silent, "Enabled")
+CreateToggle(LegitPage, "Always On", "Does not require keybind to be held", shared.YuniSettings.Silent, "AlwaysOn")
+CreateKeybind(LegitPage, "Silent Keybind", "Key to activate Silent Aim", shared.YuniSettings.Silent.Key, shared.YuniSettings.Silent, "Key")
+CreateDropdown(LegitPage, "Target Part", "Body part hitbox priority", {"Head", "HumanoidRootPart", "Torso"}, shared.YuniSettings.Silent.TargetBone, shared.YuniSettings.Silent, "TargetBone")
+CreateSlider(LegitPage, "Silent FOV Radius", "Silent capture zone size", 10, 500, shared.YuniSettings.Silent.FOVSize, shared.YuniSettings.Silent, "FOVSize")
+CreateToggle(LegitPage, "Show Silent FOV", "Render dynamic capture radius", shared.YuniSettings.Silent, "ShowFOV")
+CreateToggle(LegitPage, "Silent Target Visualizer", "Renders targets prediction lock", shared.YuniSettings.Silent, "ShowVisualizer")
+CreateToggle(LegitPage, "Silent Prediction", "Compensate target velocity vectors", shared.YuniSettings.Silent, "Prediction")
+CreateSlider(LegitPage, "Prediction Strength", "Compensation value factor", 0.1, 5, shared.YuniSettings.Silent.PredictionAmount, shared.YuniSettings.Silent, "PredictionAmount")
 
 local TrigHeader = Instance.new("TextLabel")
 TrigHeader.Size = UDim2.new(1, 0, 0, 25)
@@ -905,6 +936,10 @@ end)
 
 task.spawn(function()
     SafeLoad("Desync Module", BaseGitHubUrl .. "desync.lua")
+end)
+
+task.spawn(function()
+    SafeLoad("Silent Aim Module", BaseGitHubUrl .. "silentaim.lua")
 end)
 
 shared.YuniSettings.Loaded = true
