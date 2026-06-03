@@ -35,6 +35,11 @@ shared.YuniSettings = {
         FakeLagEnabled = false,
         FakeLagLimit = 15,
         FakeLagKey = Enum.KeyCode.F,
+
+        DesyncEnabled = false,
+        DesyncMode = "Predictive", -- "Predictive", "Spin", "Jitter"
+        DesyncMultiplier = 15,     -- Inverse force
+        DesyncKey = Enum.KeyCode.H,
     }
 }
 
@@ -792,6 +797,11 @@ CreateToggle(MiscPage, "Fake Lag", "Desyncs physics replication to bypass ragdol
 CreateSlider(MiscPage, "Fake Lag Limit", "Replication freeze length (ticks)", 1, 30, shared.YuniSettings.Misc.FakeLagLimit, shared.YuniSettings.Misc, "FakeLagLimit")
 CreateKeybind(MiscPage, "Fake Lag Keybind", "Toggle Fake Lag instantly", shared.YuniSettings.Misc.FakeLagKey, shared.YuniSettings.Misc, "FakeLagKey")
 
+CreateToggle(MiscPage, "Desync (Anti-Aim)", "Disrupts predictive aimbots and head alignment", shared.YuniSettings.Misc, "DesyncEnabled")
+CreateDropdown(MiscPage, "Desync Mode", "Type of desynchronization method", {"Predictive", "Spin", "Jitter"}, shared.YuniSettings.Misc.DesyncMode, shared.YuniSettings.Misc, "DesyncMode")
+CreateSlider(MiscPage, "Desync Multiplier", "Velocity spoofing power / spin speed", 1, 100, shared.YuniSettings.Misc.DesyncMultiplier, shared.YuniSettings.Misc, "DesyncMultiplier")
+CreateKeybind(MiscPage, "Desync Keybind", "Toggle Desync instantly", shared.YuniSettings.Misc.DesyncKey, shared.YuniSettings.Misc, "DesyncKey")
+
 CreateButtonCard(ConfigsPage, "Save Settings", "Write configs to workspace folder", "Save", function()
     if shared.YuniActions and shared.YuniActions.SaveConfig then
         shared.YuniActions.SaveConfig()
@@ -891,6 +901,10 @@ end)
 
 task.spawn(function()
     SafeLoad("Configs Module", BaseGitHubUrl .. "configs.lua")
+end)
+
+task.spawn(function()
+    SafeLoad("Desync Module", BaseGitHubUrl .. "desync.lua")
 end)
 
 shared.YuniSettings.Loaded = true
