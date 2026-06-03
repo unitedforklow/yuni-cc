@@ -4,7 +4,6 @@ local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
--- 1. Ожидаем завершения инициализации интерфейса с таймаутом
 local timeout = 15
 local elapsed = 0
 while not (shared.YuniSettings and shared.YuniSettings.Loaded) do
@@ -16,7 +15,6 @@ while not (shared.YuniSettings and shared.YuniSettings.Loaded) do
     end
 end
 
--- Инициализируем Drawing-объекты (как circles в C# Scene)
 local FovCircle = Drawing.new("Circle")
 FovCircle.Thickness = 1
 FovCircle.Color = Color3.fromRGB(255, 255, 255)
@@ -58,7 +56,6 @@ local function cleanConnections()
     end)
 end
 
--- 2. Обработка нажатий клавиш активации
 connections.InputBegan = UserInputService.InputBegan:Connect(function(input, processed)
     if processed or not shared.YuniSettings or not shared.YuniSettings.Active then return end
     local settings = shared.YuniSettings.Silent
@@ -78,7 +75,6 @@ connections.InputEnded = UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- 3. Вычисление позиции кости с учетом упреждения (Prediction)
 local function getPredictedPosition(player)
     local settings = shared.YuniSettings.Silent
     local character = player.Character
@@ -93,7 +89,7 @@ local function getPredictedPosition(player)
     if settings.Prediction then
         local velocity = bone.AssemblyLinearVelocity or bone.Velocity
         if velocity then
-            -- Вычисляем упреждение (эквивалентно s.PredictionX / Y в C#)
+
             local mult = settings.PredictionAmount or 1.5
             position = position + (velocity * (mult / 100))
         end
@@ -102,7 +98,6 @@ local function getPredictedPosition(player)
     return position
 end
 
--- 4. Поиск ближайшей к курсору цели внутри FOV
 local function getClosestTarget()
     local settings = shared.YuniSettings.Silent
     local lockOnSettings = shared.YuniSettings.LockOn
@@ -116,7 +111,6 @@ local function getClosestTarget()
 
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer then
-            -- Проверка на команду (используем общую настройку из LockOn)
             local teamCheck = lockOnSettings and lockOnSettings.IgnoreTeammates
             if not (teamCheck and player.Team == LocalPlayer.Team) then
                 local character = player.Character
@@ -142,7 +136,6 @@ local function getClosestTarget()
     return closestPlayer
 end
 
--- 5. Рендеринг визуализаций (PreRender цикл)
 connections.PreRender = RunService.PreRender:Connect(function()
     if not shared.YuniSettings or not shared.YuniSettings.Active then
         cleanConnections()
@@ -152,7 +145,6 @@ connections.PreRender = RunService.PreRender:Connect(function()
     local settings = shared.YuniSettings.Silent
     local mousePos = UserInputService:GetMouseLocation()
 
-    -- Отрисовка FOV окружности с пульсацией (эквивалент s.ShowSilentFOV в C#)
     if settings.Enabled and settings.ShowFOV then
         local pulse = (settings.FOVSize or 100) + math.sin(tick() * 2.5) * 3.0
         FovCircle.Position = mousePos
@@ -162,10 +154,8 @@ connections.PreRender = RunService.PreRender:Connect(function()
         FovCircle.Visible = false
     end
 
-    -- Поиск текущей цели
     currentTarget = getClosestTarget()
 
-    -- Отрисовка маркера захвата (эквивалент s.SilentVisualizer в C#)
     if currentTarget and settings.ShowVisualizer then
         local targetPos = getPredictedPosition(currentTarget)
         if targetPos then
@@ -176,7 +166,6 @@ connections.PreRender = RunService.PreRender:Connect(function()
                 VisualizerOuter.Position = screenVec2
                 VisualizerOuter.Visible = true
 
-                -- Внутренний пульсирующий маркер
                 local pulseRadius = 7.0 + math.sin(tick() * 10) * 2.5
                 VisualizerInner.Position = screenVec2
                 VisualizerInner.Radius = pulseRadius
@@ -192,7 +181,6 @@ connections.PreRender = RunService.PreRender:Connect(function()
     end
 end)
 
--- 6. Перехват вызовов (Metamethod Hook) для перенаправления выстрелов в Rivals
 local HookNamecall
 HookNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
     local method = getnamecallmethod()
@@ -204,17 +192,15 @@ HookNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...
             if currentTarget then
                 local targetPos = getPredictedPosition(currentTarget)
                 if targetPos then
-                    -- Перехватываем вызовы преобразования экранных координат в луч (Rivals использует ScreenPointToRay)
                     if self == Camera and (method == "ScreenPointToRay" or method == "ViewportPointToRay") then
                         local origin = Camera.CFrame.Position
                         local direction = (targetPos - origin).Unit
                         return Ray.new(origin, direction)
                     end
 
-                    -- Перехватываем физический Raycast
                     if self == workspace and method == "Raycast" then
                         local origin = args[1]
-                        args[2] = (targetPos - origin).Unit * 1000 -- Перенаправляем вектор движения пули точно в цель
+                        args[2] = (targetPos - origin).Unit * 1000
                         return HookNamecall(self, unpack(args))
                     end
                 end
@@ -225,4 +211,4 @@ HookNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...
     return HookNamecall(self, ...)
 end))
 
-print("[yuni.cc] Backend Silent Aim successfully loaded and optimized for Rivals.")
+print("[yuni.cc] Module Silent Aim is loaded.")
