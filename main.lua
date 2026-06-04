@@ -37,7 +37,7 @@ shared.YuniSettings = {
         FakeLagKey = Enum.KeyCode.F,
 
         DesyncEnabled = false,
-        DesyncMode = "Predictive", -- "Predictive", "Spin", "Jitter"
+        DesyncMode = "Jitter", -- "Predictive", "Spin", "Jitter"
         DesyncMultiplier = 15,     -- Inverse force
         DesyncKey = Enum.KeyCode.H,
     }
@@ -134,7 +134,6 @@ TitleShadow.Position = UDim2.new(0, 16, 0, 1)
 TitleShadow.ZIndex = Title.ZIndex - 1
 TitleShadow.Parent = Header
 
--- Бейдж v1.0.0
 local Badge = Instance.new("Frame")
 Badge.Size = UDim2.new(0, 55, 0, 20)
 Badge.Position = UDim2.new(0, 100, 0.5, -10)
@@ -149,7 +148,7 @@ BadgeCorner.Parent = Badge
 local BadgeText = Instance.new("TextLabel")
 BadgeText.Size = UDim2.new(1, 0, 1, 0)
 BadgeText.BackgroundTransparency = 1
-BadgeText.Text = "v1.0.1"
+BadgeText.Text = "v1.0.4-BETA"
 BadgeText.Font = Enum.Font.GothamBold
 BadgeText.TextSize = 11
 BadgeText.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -269,7 +268,6 @@ local function CreateTabButton(name, emoji)
     TabButtons[name] = Button
 end
 
--- Создаем страницы и вкладки
 local VisualsPage = CreatePage("Visuals")
 local LegitPage = CreatePage("Legit")
 local MiscPage = CreatePage("Misc")
@@ -812,8 +810,6 @@ end)
 CreateButtonCard(ConfigsPage, "Load Settings", "Read configs from workspace folder", "Load", function()
     if shared.YuniActions and shared.YuniActions.LoadConfig then
         shared.YuniActions.LoadConfig()
-        -- Так как UI уже построен, изменения применятся в бэкенде мгновенно.
-        -- Для визуального обновления интерфейса рекомендуется перезапустить чит.
     else
         warn("[yuni.cc] Load action is not registered yet.")
     end
@@ -856,7 +852,7 @@ UserInputService.InputChanged:Connect(function(input)
 end)
 
 UserInputService.InputBegan:Connect(function(input, processed)
-    if not processed and input.KeyCode == Enum.KeyCode.Insert then
+    if not processed and input.KeyCode == Enum.KeyCode.RightShift then
         MainFrame.Visible = not MainFrame.Visible
     end
 end)
