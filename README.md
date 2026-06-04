@@ -32,6 +32,8 @@ The project is fully modular, all UI render happens in main.lua, and is module-a
 4. **`triggerbot.lua`** - Triggerbot, just like in CS2 cheat.
 5. **`misc.lua`** - Some utilities.
 6. **`fakelag.lua`** - makes you fakelag.
+7. **`configs.lua`** - saves your settings in your executor workspace (yuni_config.json).
+8. **`desync.lua`** - rage feature makes others aimbots work badly on you.
 
 ---
 
