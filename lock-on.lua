@@ -65,7 +65,11 @@ local function getClosestPlayer()
     local settings = shared.YuniSettings.LockOn
     local localCharacter = LocalPlayer.Character
     local localHrp = localCharacter and localCharacter:FindFirstChild("HumanoidRootPart")
-    if not localHrp then return nil end
+    if not localHrp then 
+        lockOnActive = false
+        currentTarget = nil
+        return nil 
+    end
 
     if settings.Sticky and currentTarget then
         local character = currentTarget.Character
@@ -74,26 +78,31 @@ local function getClosestPlayer()
         
         if hrp and humanoid and humanoid.Health > 0 then
             local screenPos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
-            if onScreen then
-                local passesWall = true
-                if settings.WallCheck then
-                    passesWall = checkWall(hrp.Position, character)
+            
+            local passesWall = true
+            if settings.WallCheck then
+                passesWall = checkWall(hrp.Position, character)
+            end
+            
+            local passesFOV = true
+            if settings.FOV and onScreen then
+                local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+                local distanceToCenter = (Vector2.new(screenPos.X, screenPos.Y) - screenCenter).Magnitude
+                if distanceToCenter > settings.FOVSize then
+                    passesFOV = false
                 end
-                
-                if passesWall then
-                    if settings.FOV then
-                        local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
-                        local distanceToCenter = (Vector2.new(screenPos.X, screenPos.Y) - screenCenter).Magnitude
-                        if distanceToCenter <= settings.FOVSize then
-                            return currentTarget
-                        end
-                    else
-                        return currentTarget
-                    end
-                end
+            elseif settings.FOV and not onScreen then
+                passesFOV = false
+            end
+            
+            if onScreen and passesWall and passesFOV then
+                return currentTarget
             end
         end
+        
+        lockOnActive = false
         currentTarget = nil
+        return nil
     end
 
     local closestPlayer = nil
@@ -191,18 +200,17 @@ local function getSmoothLookCFrame(originalCFrame, targetPosition, smoothness)
     lastTime = currentTime
     
     dt = math.clamp(dt, 0.001, 0.1)
-    
-    local lerpFactor = math.clamp((1 / smoothness) * (dt * 60), 0.01, 1)
+
+    local lerpFactor = math.clamp((1 / smoothness) * (dt * 60), 0.01, 1) -- uses your max fps, must add a slider to edit this
     return originalCFrame:Lerp(targetCFrame, lerpFactor)
 end
 
 local HookNewIndex
 HookNewIndex = hookmetamethod(game, "__newindex", newcclosure(function(self, property, value)
-    -- Если чит выгружается, мгновенно пропускаем хук
     if not shared.YuniSettings or not shared.YuniSettings.Active then
         return HookNewIndex(self, property, value)
     end
-
+            
     if self == Camera and property == "CFrame" and not checkcaller() then
         local settings = shared.YuniSettings.LockOn
         if settings and settings.Enabled and lockOnActive and settings.Type == "Camera" then
@@ -267,6 +275,15 @@ PreRenderConn = RunService.PreRender:Connect(function()
 
     local settings = shared.YuniSettings.LockOn
 
+    if currentTarget then
+        local character = currentTarget.Character
+        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+        if not humanoid or humanoid.Health <= 0 then
+            lockOnActive = false
+            currentTarget = nil
+        end
+    end
+
     if settings.Enabled and settings.FOV then
         local mouseLocation = UserInputService:GetMouseLocation()
         FovCircle.Position = mouseLocation
@@ -276,10 +293,44 @@ PreRenderConn = RunService.PreRender:Connect(function()
         FovCircle.Visible = false
     end
 
-    if settings.Enabled and lockOnActive and settings.Type == "Mouse" then
+    if settings.Enabled and lockOnActive then
         local target = getClosestPlayer()
         if target then
-            aimAt(target)
+            if settings.Type == "Mouse" then
+                aimAt(target)
+
+            elseif settings.Type == "Camera" and mousemoverel then
+                local character = target.Character
+                local aimPart = character and (character:FindFirstChild("Head") or character:FindFirstChild("HumanoidRootPart"))
+                if aimPart then
+                    local targetPos = aimPart.Position
+                    local velocity = aimPart.AssemblyLinearVelocity or aimPart.Velocity
+                    if velocity and settings.Prediction > 0 then
+                        targetPos = targetPos + (velocity * (settings.Prediction / 100))
+                    end
+                    
+                    local screenPos, onScreen = Camera:WorldToViewportPoint(targetPos)
+                    if onScreen then
+                        local isMouseLocked = UserInputService.MouseBehavior == Enum.MouseBehavior.LockCenter 
+                                           or UserInputService.MouseBehavior == Enum.MouseBehavior.LockCurrentPosition
+                                           or not UserInputService.CursorIconEnabled
+
+                        local originPos = isMouseLocked and (Camera.ViewportSize / 2) or (UserInputService:GetMouseLocation() - GuiService:GetGuiInset())
+                        
+                        local diffX = (screenPos.X - originPos.X)
+                        local diffY = (screenPos.Y - originPos.Y)
+                        
+                        local smooth = math.max(settings.Smoothness, 1)
+                        local stepX = diffX / smooth
+                        local stepY = diffY / smooth
+
+                        stepX = math.clamp(stepX, -15, 15)
+                        stepY = math.clamp(stepY, -15, 15)
+
+                        mousemoverel(stepX, stepY)
+                    end
+                end
+            end
         end
     end
 end)
