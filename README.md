@@ -28,7 +28,7 @@ The project is fully modular, all UI render happens in main.lua, and is module-a
 
 1. **`main.lua`** - Core of the project.
 2. **`visuals.lua`** - ESP, uses Drawing API (https://docs.sunc.su/Drawing/)
-3. **`lock-on.lua`** - Aimbot, a little buggy, doesn't support Rivals.
+3. **`lock-on.lua`** - Aimbot, a little buggy. Rivals Support.
 4. **`triggerbot.lua`** - Triggerbot, just like in CS2 cheat.
 5. **`misc.lua`** - Some utilities.
 6. **`fakelag.lua`** - makes you fakelag.
