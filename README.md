@@ -18,7 +18,7 @@ To use this, copy&paste this code into your executor:
 loadstring(game:HttpGet("https://raw.githubusercontent.com/unitedforklow/yuni-cc/main/main.lua"))()
 ```
 
-*Show/hide menu:* **`Insert`**
+*Show/hide menu:* **`Right Shift`**
 
 ---
 
