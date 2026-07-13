@@ -162,7 +162,7 @@ local function aimAt(target)
         if onScreen then
             local isMouseLocked = UserInputService.MouseBehavior == Enum.MouseBehavior.LockCenter 
                                or UserInputService.MouseBehavior == Enum.MouseBehavior.LockCurrentPosition
-                               or not UserInputService.CursorIconEnabled
+                               or not UserInputService.MouseIconEnabled
 
             local originPos
             if isMouseLocked then
@@ -201,7 +201,7 @@ local function getSmoothLookCFrame(originalCFrame, targetPosition, smoothness)
     
     dt = math.clamp(dt, 0.001, 0.1)
 
-    local lerpFactor = math.clamp((1 / smoothness) * (dt * 60), 0.01, 1) -- uses your max fps, must add a slider to edit this
+    local lerpFactor = math.clamp((1 / smoothness) * (dt * 60), 0.01, 1)
     return originalCFrame:Lerp(targetCFrame, lerpFactor)
 end
 
@@ -298,8 +298,7 @@ PreRenderConn = RunService.PreRender:Connect(function()
         if target then
             if settings.Type == "Mouse" then
                 aimAt(target)
-
-            elseif settings.Type == "Camera" and mousemoverel then
+            elseif settings.Type == "Camera" then
                 local character = target.Character
                 local aimPart = character and (character:FindFirstChild("Head") or character:FindFirstChild("HumanoidRootPart"))
                 if aimPart then
@@ -309,26 +308,8 @@ PreRenderConn = RunService.PreRender:Connect(function()
                         targetPos = targetPos + (velocity * (settings.Prediction / 100))
                     end
                     
-                    local screenPos, onScreen = Camera:WorldToViewportPoint(targetPos)
-                    if onScreen then
-                        local isMouseLocked = UserInputService.MouseBehavior == Enum.MouseBehavior.LockCenter 
-                                           or UserInputService.MouseBehavior == Enum.MouseBehavior.LockCurrentPosition
-                                           or not UserInputService.CursorIconEnabled
-
-                        local originPos = isMouseLocked and (Camera.ViewportSize / 2) or (UserInputService:GetMouseLocation() - GuiService:GetGuiInset())
-                        
-                        local diffX = (screenPos.X - originPos.X)
-                        local diffY = (screenPos.Y - originPos.Y)
-                        
-                        local smooth = math.max(settings.Smoothness, 1)
-                        local stepX = diffX / smooth
-                        local stepY = diffY / smooth
-
-                        stepX = math.clamp(stepX, -15, 15)
-                        stepY = math.clamp(stepY, -15, 15)
-
-                        mousemoverel(stepX, stepY)
-                    end
+                    local smoothVal = math.max(settings.Smoothness, 1)
+                    Camera.CFrame = getSmoothLookCFrame(Camera.CFrame, targetPos, smoothVal)
                 end
             end
         end
