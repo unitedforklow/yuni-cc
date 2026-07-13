@@ -5,6 +5,7 @@ shared.YuniSettings = {
         Name = false,
         Distance = false,
         Health = false,
+        HealthText = false,
         TeamName = false,
         Tracers = false,
     },
