@@ -1,3 +1,6 @@
+shared.YuniSettings.Loaded = true
+
+print("[yuni.cc] Main interface is loaded!")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
@@ -21,6 +24,7 @@ local function createEsp(player)
         Name = Drawing.new("Text"),
         Distance = Drawing.new("Text"),
         TeamName = Drawing.new("Text"),
+        HealthText = Drawing.new("Text"),
         HealthBarOutline = Drawing.new("Square"),
         HealthBar = Drawing.new("Square"),
         Tracer = Drawing.new("Line"),
@@ -60,6 +64,13 @@ local function createEsp(player)
     esp.TeamName.Visible = false
     esp.TeamName.Font = 2
 
+    esp.HealthText.Size = 11
+    esp.HealthText.Center = true
+    esp.HealthText.Outline = true
+    esp.HealthText.Color = Color3_fromRGB(0, 255, 0)
+    esp.HealthText.Visible = false
+    esp.HealthText.Font = 2
+
     esp.HealthBarOutline.Thickness = 1
     esp.HealthBarOutline.Color = Color3_fromRGB(0, 0, 0)
     esp.HealthBarOutline.Filled = true
@@ -88,6 +99,7 @@ local function hideEsp(esp)
     esp.Name.Visible = false
     esp.Distance.Visible = false
     esp.TeamName.Visible = false
+    esp.HealthText.Visible = false
     esp.HealthBar.Visible = false
     esp.HealthBarOutline.Visible = false
     esp.Tracer.Visible = false
@@ -128,6 +140,7 @@ Connection = RunService.RenderStepped:Connect(function()
     local showDistance = settings.Distance
     local showTeamName = settings.TeamName
     local showHealth = settings.Health
+    local showHealthText = settings.HealthText
     local showTracers = settings.Tracers
 
     for _, player in ipairs(Players:GetPlayers()) do
@@ -216,6 +229,26 @@ Connection = RunService.RenderStepped:Connect(function()
                     else
                         esp.HealthBar.Visible = false
                         esp.HealthBarOutline.Visible = false
+                    end
+
+                    if showHealthText then
+                        local currentHealth = math_floor(humanoid.Health)
+                        local healthPct = math_clamp(humanoid.Health / humanoid.MaxHealth, 0, 1)
+                        
+                        local lateralOffset = showHealth and -20 or -14
+                        local targetY = boxY + (boxHeight * (1 - healthPct)) - 5
+                        
+                        esp.HealthText.Position = Vector2_new(boxX + lateralOffset, targetY)
+                        
+                        local textValue = tostring(currentHealth)
+                        if esp.HealthText.Text ~= textValue then 
+                            esp.HealthText.Text = textValue 
+                        end
+                        
+                        esp.HealthText.Color = Color3_fromRGB(255, 0, 0):Lerp(Color3_fromRGB(0, 255, 0), healthPct)
+                        esp.HealthText.Visible = true
+                    else
+                        esp.HealthText.Visible = false
                     end
 
                     if showTracers then
