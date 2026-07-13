@@ -748,6 +748,7 @@ CreateToggle(VisualsPage, "2D Box", "Render physical boxes around targets", shar
 CreateToggle(VisualsPage, "Name ESP", "Display targets names over their models", shared.YuniSettings.Visuals, "Name")
 CreateToggle(VisualsPage, "Distance", "Show distance in meters to target", shared.YuniSettings.Visuals, "Distance")
 CreateToggle(VisualsPage, "Health Bar", "Show live vertical health bar status", shared.YuniSettings.Visuals, "Health")
+CreateToggle(VisualsPage, "Health Text", "Display live health points as text", shared.YuniSettings.Visuals, "HealthText")
 CreateToggle(VisualsPage, "Team Name", "Show target's team name underneath", shared.YuniSettings.Visuals, "TeamName")
 CreateToggle(VisualsPage, "Tracers", "Draw paths from bottom center to targets", shared.YuniSettings.Visuals, "Tracers")
 
