@@ -149,7 +149,7 @@ BadgeCorner.Parent = Badge
 local BadgeText = Instance.new("TextLabel")
 BadgeText.Size = UDim2.new(1, 0, 1, 0)
 BadgeText.BackgroundTransparency = 1
-BadgeText.Text = "v1.0.4-BETA"
+BadgeText.Text = "1.0.4"
 BadgeText.Font = Enum.Font.GothamBold
 BadgeText.TextSize = 11
 BadgeText.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -854,7 +854,7 @@ UserInputService.InputChanged:Connect(function(input)
 end)
 
 UserInputService.InputBegan:Connect(function(input, processed)
-    if not processed and input.KeyCode == Enum.KeyCode.RightShift then
+    if not processed and input.KeyCode == Enum.KeyCode.RightControl then
         MainFrame.Visible = not MainFrame.Visible
     end
 end)
