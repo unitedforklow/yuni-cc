@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-Active-success?style=for-the-badge" alt="Status">
-  <img src="https://img.shields.io/badge/Version-v1.0.4.beta-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Version-v1.0.4-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Platform-Roblox-red?style=for-the-badge" alt="Platform">
 </p>
 
